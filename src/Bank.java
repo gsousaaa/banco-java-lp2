@@ -1,73 +1,41 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class Bank {
+    private List<Agency> agencies;
     private AuthUser authService;
 
     public Bank(AuthUser authService) {
         this.authService = authService;
+        this.agencies = new ArrayList<>();
     }
 
-    public Account createAccount(String accountType, double initialBalance) {
-        if (authService.getLoggedUser() == null) {
-            return null;
-        }
-        Account newAccount = new Account(accountType, initialBalance, authService.getLoggedUser());
-        authService.getLoggedUser().getUserAccounts().add(newAccount);
-        return newAccount;
+    // Adiciona uma nova agência ao banco
+    public void addAgency(Agency agency) {
+        agencies.add(agency);
+        CSVWriter.appendToCSV("agencies.csv", agency.toCSV());
     }
 
-    public double checkAccountBalance(String accountNumber) {
-        for (Account account : authService.getLoggedUser().getUserAccounts()) {
-            if (account.getAccountNumber().equals(accountNumber)) {
-                return account.getBalance();
+    // Busca uma agência pelo número
+    public Agency findAgencyByNumber(double agencyNumber) {
+        for (Agency agency : agencies) {
+            if (agency.getAgencyNumber() == agencyNumber) {
+                return agency;
             }
         }
-        return -1;
+        return null;
     }
-
-    public boolean deposit(String accountNumber, double value) {
-        for (Account account : authService.getLoggedUser().getUserAccounts()) {
-            if (account.getAccountNumber().equals(accountNumber)) {
-                account.depositMoney(value);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean withdraw(String accountNumber, double value) {
-        for (Account account : authService.getLoggedUser().getUserAccounts()) {
-            if (account.getAccountNumber().equals(accountNumber)) {
-                return account.withdrawMoney(value);
-            }
-        }
-        return false;
-    }
-
-    public boolean transfer(String sourceAccountNumber, String recipientAccountNumber, double value) {
-        Account sourceAccount = null;
-        Account recipientAccount = null;
-
-        for (Account account : authService.getLoggedUser().getUserAccounts()) {
-            if (account.getAccountNumber().equals(sourceAccountNumber)) {
-                sourceAccount = account;
-                break;
-            }
-        }
-
-        for (User user : authService.getUsers()) {
-            for (Account account : user.getUserAccounts()) {
-                if (account.getAccountNumber().equals(recipientAccountNumber)) {
-                    recipientAccount = account;
-                    break;
+    
+    // Busca uma conta pelo número em todas as agências
+    public Account findAccountInAllAgencies(String accountNumber) {
+        for (Agency agency : agencies) {
+            for (Account account : agency.getAccounts()) {
+                if (account.getAccountNumber().equals(accountNumber)) {
+                    return account;
                 }
             }
         }
-
-        if (sourceAccount == null || recipientAccount == null) {
-            return false;
-        }
-
-        return sourceAccount.transferMoney(recipientAccount, value);
+        return null;
     }
+
 }
