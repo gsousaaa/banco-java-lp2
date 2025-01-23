@@ -93,6 +93,8 @@ public class Main {
                         case 1:
                             scanner.nextLine();
                             newAccount = new ContaCorrente(initialBalance, authService.getLoggedUser(), 10, agency1.getAgencyNumber());
+                            ((ContaCorrente) newAccount).chargeMaintenanceValue();
+                            
                             break;
 
                         case 2:
